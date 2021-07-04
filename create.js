@@ -13,6 +13,8 @@
 let Delaunator   = require('delaunator');        // ISC licensed
 let TriangleMesh = require('./');
 
+Delaunator = Delaunator.default || Delaunator;
+
 function s_next_s(s) { return (s % 3 == 2) ? s-2 : s+1; }
 
 
@@ -48,7 +50,7 @@ function checkTriangleInequality({_r_vertex, _triangles, _halfedges}) {
     // NOTE: a much faster test would be the ratio of the inradius to
     // the circumradius, but as I'm generating these offline, I'm not
     // worried about speed right now
-    
+
     // TODO: consider adding circumcenters of skinny triangles to the point set
     if (count > 0) {
         console.log('  bad angles:', summary.join(" "));
@@ -102,7 +104,7 @@ function addBoundaryPoints(spacing, size) {
 function addGhostStructure({_r_vertex, _triangles, _halfedges}) {
     const numSolidSides = _triangles.length;
     const ghost_r = _r_vertex.length;
-    
+
     let numUnpairedSides = 0, firstUnpairedEdge = -1;
     let r_unpaired_s = []; // seed to side
     for (let s = 0; s < numSolidSides; s++) {
@@ -128,7 +130,7 @@ function addGhostStructure({_r_vertex, _triangles, _halfedges}) {
         s_newopposite_s[s] = ghost_s;
         s_newopposite_s[ghost_s] = s;
         s_newstart_r[ghost_s] = s_newstart_r[s_next_s(s)];
-        
+
         // Construct the rest of the ghost triangle
         s_newstart_r[ghost_s + 1] = s_newstart_r[s];
         s_newstart_r[ghost_s + 2] = ghost_r;
@@ -192,13 +194,13 @@ class MeshBuilder {
     getNonBoundaryPoints() {
         return this.points.slice(this.numBoundaryRegions);
     }
-    
+
     /** (used for more advanced mixing of different mesh types) */
     clearNonBoundaryPoints() {
         this.points.splice(this.numBoundaryRegions, this.points.length);
         return this;
     }
-    
+
     /** Pass in the constructor from the poisson-disk-sampling module */
     addPoisson(Poisson, spacing, random=Math.random) {
         let generator = new Poisson({
@@ -225,7 +227,7 @@ class MeshBuilder {
             checkPointInequality(graph);
             checkTriangleInequality(graph);
         }
-        
+
         graph = addGhostStructure(graph);
         graph.numBoundaryRegions = this.numBoundaryRegions;
         if (runChecks) {
