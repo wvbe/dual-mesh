@@ -6,8 +6,34 @@
 
 import { expect, it, run } from 'https://deno.land/x/tincan@1.0.1/mod.ts';
 import Delaunator from 'npm:delaunator@^4.0.0';
-import Poisson from '../poisson-disk-sampling/mod.ts';
+import Poisson from 'https://raw.githubusercontent.com/wvbe/poisson-disk-sampling/deno-rc.1/mod.ts';
+import MeshBuilder from './mod.ts';
 import { DelaunatorI } from './types.ts';
+
+it('structural invariants', () => {
+	const mesh = new MeshBuilder({ boundarySpacing: 450 }).addPoisson(Poisson, 450).create(true);
+
+	let s_out: number[] = [];
+	for (let s1 = 0; s1 < mesh.numSides; s1++) {
+		let s2 = mesh.s_opposite_s(s1);
+		expect(mesh.s_opposite_s(s2)).toBe(s1);
+		expect(mesh.s_begin_r(s1)).toBe(mesh.s_end_r(s2));
+		expect(mesh.s_inner_t(s1)).toBe(mesh.s_outer_t(s2));
+		expect(mesh.s_begin_r(mesh.s_next_s(s1))).toBe(mesh.s_begin_r(s2));
+	}
+	for (let r = 0; r < mesh.numRegions; r++) {
+		mesh.r_circulate_s(s_out, r);
+		for (let s of s_out) {
+			expect(mesh.s_begin_r(s)).toBe(r);
+		}
+	}
+	for (let t = 0; t < mesh.numTriangles; t++) {
+		mesh.t_circulate_s(s_out, t);
+		for (let s of s_out) {
+			expect(mesh.s_inner_t(s)).toBe(t);
+		}
+	}
+});
 
 it('delaunator: properly connected halfedges', () => {
 	const points = [

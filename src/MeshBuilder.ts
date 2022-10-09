@@ -10,12 +10,11 @@
 
 'use strict';
 
-import type PoissonDiskSampling from '../poisson-disk-sampling/mod.ts';
+import type PoissonDiskSampling from 'https://raw.githubusercontent.com/wvbe/poisson-disk-sampling/deno-rc.1/mod.ts';
 import TriangleMesh from './TriangleMesh.ts';
-import { type PartialMesh } from './types.ts';
+import { PointI, type PartialMesh } from '../types.ts';
 
 import Delaunator from 'npm:delaunator@^4.0.0'; // ISC licensed
-import { PointI } from '../poisson-disk-sampling/src/types.ts';
 
 function s_next_s(s: number): number {
 	return s % 3 == 2 ? s - 2 : s + 1;
@@ -97,9 +96,9 @@ function checkMeshConnectivity({ _r_vertex, _triangles, _halfedges }: PartialMes
  * These points also prevent the Poisson disc generator
  * from making uneven points near the boundary.
  */
-function addBoundaryPoints(spacing: number, size: number): number[][] {
+function addBoundaryPoints(spacing: number, size: number): PointI[] {
 	const N = Math.ceil(size / spacing);
-	const points: number[][] = [];
+	const points: PointI[] = [];
 	for (let i = 0; i <= N; i++) {
 		const t = (i + 0.5) / (N + 1);
 		const w = size * t;

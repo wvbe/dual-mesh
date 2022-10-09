@@ -4,9 +4,9 @@
  * License: Apache v2.0 <http://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
-import { PointI } from '../poisson-disk-sampling/src/types.ts';
-import { DelaunatorI, PartialMesh } from './types.ts';
+import { DelaunatorI, PartialMesh } from '../types.ts';
 
+type PointI = [number, number];
 /**
  * Represent a triangle-polygon dual mesh with:
  *   - Regions (r)
@@ -49,7 +49,7 @@ class TriangleMesh implements PartialMesh {
 	numBoundaryRegions = 0;
 
 	// Internals
-	_r_in_s: number[] = [];
+	_r_in_s = new Int32Array();
 	_halfedges = new Int32Array();
 	_triangles = new Int32Array();
 	_t_vertex: number[][];
@@ -119,12 +119,12 @@ class TriangleMesh implements PartialMesh {
 		}
 
 		// Construct an index for finding sides connected to a region
-		// this._r_in_s = new Int32Array(this.numRegions);
-		this._r_in_s = new Array(this.numRegions);
+		this._r_in_s = new Int32Array(this.numRegions);
+		// this._r_in_s = new Array(this.numRegions);
 		for (let s = 0; s < _triangles.length; s++) {
 			const endpoint = _triangles[TriangleMesh.s_next_s(s)];
-			if (this._r_in_s[endpoint] === 0 || _halfedges[s] === -1) {
-				this._r_in_s[endpoint] = s;
+			if (this._r_in_s.at(endpoint) === 0 || _halfedges[s] === -1) {
+				this._r_in_s.set([s], endpoint);
 			}
 		}
 
@@ -236,20 +236,25 @@ class TriangleMesh implements PartialMesh {
 	}
 
 	r_circulate_s(out_s: number[], r: number): number[] {
-		const s0 = this._r_in_s[r];
+		const s0 = this._r_in_s.at(r);
+		if (s0 === undefined) {
+			throw new Error(`Invalid r value "${r}"`);
+		}
 		let incoming = s0;
 		out_s.length = 0;
 		do {
-			console.log('x');
-			out_s.push(this._halfedges[incoming]);
-			let outgoing = TriangleMesh.s_next_s(incoming);
-			incoming = this._halfedges[outgoing];
-		} while (incoming !== -1 && incoming !== s0);
+			out_s.push(this._halfedges.at(incoming) as number);
+			const outgoing = TriangleMesh.s_next_s(incoming);
+			incoming = this._halfedges.at(outgoing) as number;
+		} while (incoming !== -1 && incoming !== s0 && incoming !== undefined);
 		return out_s;
 	}
 
 	r_circulate_r(out_r: number[], r: number): number[] {
-		const s0 = this._r_in_s[r];
+		const s0 = this._r_in_s.at(r);
+		if (s0 === undefined) {
+			throw new Error(`Invalid r value "${r}"`);
+		}
 		let incoming = s0;
 		out_r.length = 0;
 		do {
@@ -261,12 +266,15 @@ class TriangleMesh implements PartialMesh {
 	}
 
 	r_circulate_t(out_t: number[], r: number): number[] {
-		const s0 = this._r_in_s[r];
+		const s0 = this._r_in_s.at(r);
+		if (s0 === undefined) {
+			throw new Error(`Invalid r value "${r}"`);
+		}
 		let incoming = s0;
 		out_t.length = 0;
 		do {
 			out_t.push(TriangleMesh.s_to_t(incoming));
-			let outgoing = TriangleMesh.s_next_s(incoming);
+			const outgoing = TriangleMesh.s_next_s(incoming);
 			incoming = this._halfedges[outgoing];
 		} while (incoming !== -1 && incoming !== s0);
 		return out_t;

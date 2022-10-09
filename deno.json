@@ -1,6 +1,6 @@
 {
 	"tasks": {
-		"test": "deno test --unstable",
+		"test": "deno test --unstable --reload tests.ts",
 		"build": "echo \"TODO\""
 	}
 }

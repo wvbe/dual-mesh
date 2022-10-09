@@ -1,4 +1,4 @@
-import { PointI } from '../poisson-disk-sampling/src/types.ts';
+export type PointI = number[];
 
 export type DelaunatorI = {
 	halfedges: Int32Array;
