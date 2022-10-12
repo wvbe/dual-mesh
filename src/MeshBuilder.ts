@@ -14,7 +14,7 @@ import type PoissonDiskSampling from 'https://raw.githubusercontent.com/wvbe/poi
 import TriangleMesh from './TriangleMesh.ts';
 import { PointI, type PartialMesh } from '../types.ts';
 
-import Delaunator from 'npm:delaunator@^4.0.0'; // ISC licensed
+import Delaunator from 'https://esm.sh/delaunator@5.0.0'; // ISC licensed
 
 function s_next_s(s: number): number {
 	return s % 3 == 2 ? s - 2 : s + 1;

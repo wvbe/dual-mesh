@@ -5,7 +5,7 @@
  */
 
 import { expect, it, run } from 'https://deno.land/x/tincan@1.0.1/mod.ts';
-import Delaunator from 'npm:delaunator@^4.0.0';
+import Delaunator from 'https://esm.sh/delaunator@5.0.0';
 import Poisson from 'https://raw.githubusercontent.com/wvbe/poisson-disk-sampling/deno-rc.1/mod.ts';
 import MeshBuilder from './mod.ts';
 import { DelaunatorI } from './types.ts';
